@@ -1,0 +1,1987 @@
+<!DOCTYPE html>
+
+<html dir="rtl" lang="ar">
+
+<head>
+    <meta charset="utf-8" />
+    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+    <title>مكتبة الألعاب - Petra XR</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@300;400;500;700;900&amp;display=swap"
+        rel="stylesheet" />
+    <style>
+        body {
+            font-family: 'Tajawal', sans-serif;
+            background-color: #050505;
+            color: #ffffff;
+            overflow-x: hidden;
+        }
+
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: #0a0a0a;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: #7c3aed;
+            border-radius: 4px;
+        }
+
+        .neon-text {
+            text-shadow: 0 0 10px rgba(124, 58, 237, 0.7), 0 0 20px rgba(124, 58, 237, 0.5);
+        }
+
+        #canvas-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100vh;
+            z-index: -1;
+        }
+
+        .glass-panel {
+            background: rgba(15, 15, 20, 0.7);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+        }
+
+        .game-card {
+            background: rgba(30, 30, 40, 0.6);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            transition: all 0.4s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .game-card:hover {
+            transform: translateY(-10px) scale(1.02);
+            border-color: rgba(124, 58, 237, 0.5);
+            box-shadow: 0 20px 40px -10px rgba(124, 58, 237, 0.2);
+        }
+
+        .game-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.1), transparent);
+            transition: 0.5s;
+        }
+
+        .game-card:hover::before {
+            left: 100%;
+        }
+
+        /* Filter Buttons */
+        .filter-btn {
+            transition: all 0.3s ease;
+        }
+
+        .filter-btn.active {
+            background-color: #8b5cf6;
+            /* Purple-500 */
+            border-color: #8b5cf6;
+            color: white;
+            box-shadow: 0 0 15px rgba(139, 92, 246, 0.4);
+        }
+
+        /* Type Badges */
+        .badge {
+            font-size: 0.7rem;
+            padding: 0.2rem 0.6rem;
+            border-radius: 9999px;
+            font-weight: bold;
+            letter-spacing: 0.05em;
+        }
+
+        .badge-action {
+            background: rgba(239, 68, 68, 0.2);
+            color: #fca5a5;
+            border: 1px solid rgba(239, 68, 68, 0.4);
+        }
+
+        .badge-kids {
+            background: rgba(34, 197, 94, 0.2);
+            color: #86efac;
+            border: 1px solid rgba(34, 197, 94, 0.4);
+        }
+
+        .badge-horror {
+            background: rgba(88, 28, 135, 0.4);
+            color: #d8b4fe;
+            border: 1px solid rgba(168, 85, 247, 0.4);
+        }
+
+        .badge-sports {
+            background: rgba(59, 130, 246, 0.2);
+            color: #93c5fd;
+            border: 1px solid rgba(59, 130, 246, 0.4);
+        }
+
+
+
+        .badge-freeroam {
+            background: rgba(59, 130, 246, 0.2);
+            color: #93c5fd;
+            border: 1px solid rgba(59, 130, 246, 0.4);
+        }
+
+
+        .badge-cool {
+            background: rgba(234, 246, 59, 0.2);
+            color: #e1fd93;
+            border: 1px solid rgba(246, 171, 59, 0.4);
+        }
+    </style>
+</head>
+
+<body class="antialiased selection:bg-purple-500 selection:text-white">
+    <!-- 3D Background (Stars) -->
+    <div id="canvas-container"></div>
+    <!-- Navigation -->
+    <nav class="fixed w-full z-50 bg-black/50 backdrop-blur-md border-b border-purple-900/30">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between h-20">
+                <a class="flex items-center gap-3 hover:opacity-80 transition" href="home.html">
+                    <i class="fas fa-vr-cardboard text-3xl text-purple-500"></i>
+                    <span class="font-bold text-2xl tracking-wider text-white">PETRA <span
+                            class="text-purple-500">XR</span></span>
+                </a>
+                <a class="flex items-center gap-2 text-sm font-medium text-gray-300 hover:text-white transition bg-white/5 px-4 py-2 rounded-full border border-white/10"
+                    href="home.html">
+                    <i class="fas fa-arrow-right ml-1"></i> العودة للرئيسية
+                </a>
+            </div>
+        </div>
+    </nav>
+    <!-- Header -->
+    <header class="pt-32 pb-12 px-4 text-center relative overflow-hidden">
+        <div class="max-w-4xl mx-auto relative z-10">
+            <span
+                class="inline-block py-1 px-3 rounded-full bg-purple-900/50 text-purple-300 text-xs font-bold mb-4 border border-purple-500/30">
+                مكتبة العاب PetraXR
+            </span>
+            <h1 class="text-4xl md:text-6xl font-black mb-6 leading-tight neon-text">
+                ألعاب الواقع الافتراضي <br />
+                <span
+                    class="text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-pink-500">Standalone</span>
+            </h1>
+            <p class="text-xl text-gray-400 max-w-2xl mx-auto">
+                مجموعة مختارة من أقوى الألعاب العالمية المرخصة، تعمل بأعلى كفاءة وبدون أسلاك لضمان حرية الحركة الكاملة.
+            </p>
+        </div>
+    </header>
+    <!-- Main Content -->
+    <main class="container mx-auto px-4 pb-20 max-w-7xl">
+        <!-- SEARCH AND FILTERS -->
+        <div
+            class="sticky top-24 z-40 bg-black/80 backdrop-blur-xl p-4 rounded-2xl border border-white/5 mb-12 shadow-2xl">
+            <div class="flex flex-col md:flex-row gap-6 items-center justify-between">
+                <!-- Search -->
+                <div class="relative w-full md:w-1/3">
+                    <input
+                        class="w-full bg-white/5 border border-white/10 rounded-full px-5 py-3 pr-10 text-white placeholder-gray-500 focus:outline-none focus:border-purple-500 focus:bg-white/10 transition"
+                        id="searchInput" placeholder="ابحث عن اسم اللعبة..." type="text" />
+                    <i class="fas fa-search absolute right-4 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
+                </div>
+                <!-- Filters -->
+                <div class="flex flex-wrap justify-center gap-2 md:gap-3" id="filters">
+                    <button
+                        class="filter-btn active px-5 py-2 rounded-full border border-white/10 bg-white/5 text-sm font-medium text-gray-300 hover:text-white"
+                        data-filter="all">الكل</button>
+                    <button
+                        class="filter-btn px-5 py-2 rounded-full border border-white/10 bg-white/5 text-sm font-medium text-gray-300 hover:text-white"
+                        data-filter="action">أكشن &amp; قتال</button>
+                    <button
+                        class="filter-btn px-5 py-2 rounded-full border border-white/10 bg-white/5 text-sm font-medium text-gray-300 hover:text-white"
+                        data-filter="horror">رعب</button>
+                    <button
+                        class="filter-btn px-5 py-2 rounded-full border border-white/10 bg-white/5 text-sm font-medium text-gray-300 hover:text-white"
+                        data-filter="sports">رياضة</button>
+                    <button
+                        class="filter-btn px-5 py-2 rounded-full border border-white/10 bg-white/5 text-sm font-medium text-gray-300 hover:text-white"
+                        data-filter="kids">أطفال &amp; عائلة</button>
+                    <button
+                        class="filter-btn px-5 py-2 rounded-full border border-white/10 bg-white/5 text-sm font-medium text-gray-300 hover:text-white"
+                        data-filter="freeroam">لعب حر</button>
+                    <button
+                        class="filter-btn px-5 py-2 rounded-full border border-white/10 bg-white/5 text-sm font-medium text-gray-300 hover:text-white"
+                        data-filter="cool">حماس </button>
+                </div>
+            </div>
+        </div>
+        <!-- Games Grid -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8" id="gamesGrid">
+            <div class="game-card rounded-2xl group cursor-pointer" data-category="freeroam"
+                data-title="MetaExperiences Bundle">
+                <div class="relative h-64 overflow-hidden">
+                    <img alt="MetaExperiences Bundle"
+                        class="w-full h-full object-cover transform group-hover:scale-110 transition duration-700"
+                        loading="lazy"
+                        src="https://cdn.synthesisvr.com/gameassets/svr_79638/header460x215_1764626941.webp" />
+                    <div class="absolute top-3 right-3 z-10">
+                        <span class="badge badge-action ">أكشن</span>
+                    </div>
+                    <div
+                        class="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition duration-300 flex items-center justify-center">
+                        <a class="bg-purple-600 hover:bg-purple-700 text-white px-6 py-2 rounded-full font-bold transform translate-y-4 group-hover:translate-y-0 transition duration-300"
+                            href="https://cdn.synthesisvr.com/gameassets/svr_79638/trailer.webm" target="_blank">
+                            التفاصيل
+                        </a>
+                    </div>
+                </div>
+                <div class="p-5">
+                    <div class="flex justify-between items-start mb-2">
+                        <h3 class="font-bold text-xl text-white truncate" title="MetaExperiences Bundle">MetaExperiences
+                            Bundle</h3>
+                        <div class="flex text-yellow-500 text-xs">
+                            <i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i
+                                class="fas fa-star"></i>
+                        </div>
+                    </div>
+                    <p class="text-gray-400 text-sm mb-4 line-clamp-2">
+                        استمتع بتجربة MetaExperiences Bundle المثيرة في صالة Petra XR.
+                    </p>
+                    <div class="flex items-center justify-between text-xs text-gray-500 border-t border-white/10 pt-3">
+                        <span><i class="fas fa-users mr-1"></i> 1 - 10</span>
+                        <span><i class="fas fa-clock mr-1"></i> حسب الحجز</span>
+                    </div>
+                </div>
+            </div>
+
+
+
+
+            <div class="game-card rounded-2xl group cursor-pointer" data-category="freeroam" data-title="HunterVR">
+                <div class="relative h-64 overflow-hidden">
+                    <img alt="HunterVR"
+                        class="w-full h-full object-cover transform group-hover:scale-110 transition duration-700"
+                        loading="lazy"
+                        src="https://cdn.synthesisvr.com/gameassets/svr_79522/header460x215_1756891174.webp" />
+                    <div class="absolute top-3 right-3 z-10">
+                        <span class="badge badge-action">أكشن</span>
+                    </div>
+                    <div
+                        class="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition duration-300 flex items-center justify-center">
+                        <a class="bg-purple-600 hover:bg-purple-700 text-white px-6 py-2 rounded-full font-bold transform translate-y-4 group-hover:translate-y-0 transition duration-300"
+                            href="https://cdn.synthesisvr.com/gameassets/svr_79522/trailer.webm" target="_blank">
+                            التفاصيل
+                        </a>
+                    </div>
+                </div>
+                <div class="p-5">
+                    <div class="flex justify-between items-start mb-2">
+                        <h3 class="font-bold text-xl text-white truncate" title="HunterVR">HunterVR</h3>
+                        <div class="flex text-yellow-500 text-xs">
+                            <i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i
+                                class="fas fa-star"></i>
+                        </div>
+                    </div>
+                    <p class="text-gray-400 text-sm mb-4 line-clamp-2">
+                        استمتع بتجربة HunterVR المثيرة في صالة Petra XR.
+                    </p>
+                    <div class="flex items-center justify-between text-xs text-gray-500 border-t border-white/10 pt-3">
+                        <span><i class="fas fa-users mr-1"></i> 1 - 10</span>
+                        <span><i class="fas fa-clock mr-1"></i> حسب الحجز</span>
+                    </div>
+                </div>
+            </div>
+
+
+
+            <div class="game-card rounded-2xl group cursor-pointer" data-category="kids" data-title="Hazard Us">
+                <div class="relative h-64 overflow-hidden">
+                    <img alt="Hazard Us"
+                        class="w-full h-full object-cover transform group-hover:scale-110 transition duration-700"
+                        loading="lazy"
+                        src="https://cdn.synthesisvr.com/gameassets/svr_79508/compress-synthesisvr_banner.jpg" />
+                    <div class="absolute top-3 right-3 z-10">
+                        <span class="badge badge-kids">عائلة</span>
+                    </div>
+                    <div
+                        class="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition duration-300 flex items-center justify-center">
+                        <a class="bg-purple-600 hover:bg-purple-700 text-white px-6 py-2 rounded-full font-bold transform translate-y-4 group-hover:translate-y-0 transition duration-300"
+                            href="https://cdn.synthesisvr.com/gameassets/svr_79508/HU_final_trailer_1.mp4"
+                            target="_blank">
+                            التفاصيل
+                        </a>
+                    </div>
+                </div>
+                <div class="p-5">
+                    <div class="flex justify-between items-start mb-2">
+                        <h3 class="font-bold text-xl text-white truncate" title="Hazard Us">Hazard Us</h3>
+                        <div class="flex text-yellow-500 text-xs">
+                            <i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i
+                                class="fas fa-star"></i>
+                        </div>
+                    </div>
+                    <p class="text-gray-400 text-sm mb-4 line-clamp-2">
+                        استمتع بتجربة Hazard Us المثيرة في صالة Petra XR.
+                    </p>
+                    <div class="flex items-center justify-between text-xs text-gray-500 border-t border-white/10 pt-3">
+                        <span><i class="fas fa-users mr-1"></i> 2 - 4</span>
+                        <span><i class="fas fa-clock mr-1"></i> حسب الحجز</span>
+                    </div>
+                </div>
+            </div>
+
+
+
+            <div class="game-card rounded-2xl group cursor-pointer" data-category="freeroam action"
+                data-title="Arizona Sunshine Remake: Free-Roam">
+                <div class="relative h-64 overflow-hidden">
+                    <img alt="Arizona Sunshine Remake: Free-Roam"
+                        class="w-full h-full object-cover transform group-hover:scale-110 transition duration-700"
+                        loading="lazy"
+                        src="https://cdn.synthesisvr.com/gameassets/svr_78900/header460x215_1758041791.webp" />
+                    <div class="absolute top-3 right-3 z-10">
+                        <span class="badge badge-action">أكشن</span>
+                    </div>
+                    <div
+                        class="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition duration-300 flex items-center justify-center">
+                        <a class="bg-purple-600 hover:bg-purple-700 text-white px-6 py-2 rounded-full font-bold transform translate-y-4 group-hover:translate-y-0 transition duration-300"
+                            href="https://cdn.synthesisvr.com/gameassets/svr_78900/trailer_fr.mp4" target="_blank">
+                            التفاصيل
+                        </a>
+                    </div>
+                </div>
+                <div class="p-5">
+                    <div class="flex justify-between items-start mb-2">
+                        <h3 class="font-bold text-xl text-white truncate" title="Arizona Sunshine Remake: Free-Roam">
+                            Arizona Sunshine Remake: Free-Roam</h3>
+                        <div class="flex text-yellow-500 text-xs">
+                            <i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i
+                                class="fas fa-star"></i>
+                        </div>
+                    </div>
+                    <p class="text-gray-400 text-sm mb-4 line-clamp-2">
+                        استمتع بتجربة Arizona Sunshine Remake: Free-Roam المثيرة في صالة Petra XR.
+                    </p>
+                    <div class="flex items-center justify-between text-xs text-gray-500 border-t border-white/10 pt-3">
+                        <span><i class="fas fa-users mr-1"></i> 1 - 8</span>
+                        <span><i class="fas fa-clock mr-1"></i> حسب الحجز</span>
+                    </div>
+                </div>
+            </div>
+            <div class="game-card rounded-2xl group cursor-pointer" data-category="horror freeroam"
+                data-title="Mansion of Death">
+                <div class="relative h-64 overflow-hidden">
+                    <img alt="Mansion of Death"
+                        class="w-full h-full object-cover transform group-hover:scale-110 transition duration-700"
+                        loading="lazy"
+                        src="https://cdn.synthesisvr.com/gameassets/svr_79371/header460x215_1756808344.webp" />
+                    <div class="absolute top-3 right-3 z-10">
+                        <span class="badge badge-horror">رعب</span>
+                    </div>
+                    <div
+                        class="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition duration-300 flex items-center justify-center">
+                        <a class="bg-purple-600 hover:bg-purple-700 text-white px-6 py-2 rounded-full font-bold transform translate-y-4 group-hover:translate-y-0 transition duration-300"
+                            href="https://cdn.synthesisvr.com/gameassets/svr_79371/trailer.mp4" target="_blank">
+                            التفاصيل
+                        </a>
+                    </div>
+                </div>
+                <div class="p-5">
+                    <div class="flex justify-between items-start mb-2">
+                        <h3 class="font-bold text-xl text-white truncate" title="Mansion of Death">Mansion of Death</h3>
+                        <div class="flex text-yellow-500 text-xs">
+                            <i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i
+                                class="fas fa-star"></i>
+                        </div>
+                    </div>
+                    <p class="text-gray-400 text-sm mb-4 line-clamp-2">
+                        استمتع بتجربة Mansion of Death المثيرة في صالة Petra XR.
+                    </p>
+                    <div class="flex items-center justify-between text-xs text-gray-500 border-t border-white/10 pt-3">
+                        <span><i class="fas fa-users mr-1"></i> 1 - 10</span>
+                        <span><i class="fas fa-clock mr-1"></i> حسب الحجز</span>
+                    </div>
+                </div>
+            </div>
+            <div class="game-card rounded-2xl group cursor-pointer" data-category="action freeroam"
+                data-title="Pixel Hack Free Roam">
+                <div class="relative h-64 overflow-hidden">
+                    <img alt="Pixel Hack Free Roam"
+                        class="w-full h-full object-cover transform group-hover:scale-110 transition duration-700"
+                        loading="lazy"
+                        src="https://cdn.synthesisvr.com/gameassets/svr_79543/header460x215_1756112872.webp" />
+                    <div class="absolute top-3 right-3 z-10">
+                        <span class="badge badge-action">أكشن</span>
+                    </div>
+                    <div
+                        class="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition duration-300 flex items-center justify-center">
+                        <a class="bg-purple-600 hover:bg-purple-700 text-white px-6 py-2 rounded-full font-bold transform translate-y-4 group-hover:translate-y-0 transition duration-300"
+                            href="https://cdn.synthesisvr.com/gameassets/svr_79543/trailer.mp4" target="_blank">
+                            التفاصيل
+                        </a>
+                    </div>
+                </div>
+                <div class="p-5">
+                    <div class="flex justify-between items-start mb-2">
+                        <h3 class="font-bold text-xl text-white truncate" title="Pixel Hack Free Roam">Pixel Hack Free
+                            Roam</h3>
+                        <div class="flex text-yellow-500 text-xs">
+                            <i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i
+                                class="fas fa-star"></i>
+                        </div>
+                    </div>
+                    <p class="text-gray-400 text-sm mb-4 line-clamp-2">
+                        استمتع بتجربة Pixel Hack Free Roam المثيرة في صالة Petra XR.
+                    </p>
+                    <div class="flex items-center justify-between text-xs text-gray-500 border-t border-white/10 pt-3">
+                        <span><i class="fas fa-users mr-1"></i> 1 - 4</span>
+                        <span><i class="fas fa-clock mr-1"></i> حسب الحجز</span>
+                    </div>
+                </div>
+            </div>
+            <div class="game-card rounded-2xl group cursor-pointer" data-category="cool" data-title="Walk The Plank">
+                <div class="relative h-64 overflow-hidden">
+                    <img alt="Walk The Plank"
+                        class="w-full h-full object-cover transform group-hover:scale-110 transition duration-700"
+                        loading="lazy"
+                        src="https://cdn.synthesisvr.com/gameassets/svr_79365/header460x215_1747155889.webp" />
+                    <div class="absolute top-3 right-3 z-10">
+                        <span class="badge badge-cool">حماس </span>
+                    </div>
+                    <div
+                        class="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition duration-300 flex items-center justify-center">
+                        <a class="bg-purple-600 hover:bg-purple-700 text-white px-6 py-2 rounded-full font-bold transform translate-y-4 group-hover:translate-y-0 transition duration-300"
+                            href="https://cdn.synthesisvr.com/gameassets/svr_79365/trailer.webm" target="_blank">
+                            التفاصيل
+                        </a>
+                    </div>
+                </div>
+                <div class="p-5">
+                    <div class="flex justify-between items-start mb-2">
+                        <h3 class="font-bold text-xl text-white truncate" title="Walk The Plank">Walk The Plank</h3>
+                        <div class="flex text-yellow-500 text-xs">
+                            <i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i
+                                class="fas fa-star"></i>
+                        </div>
+                    </div>
+                    <p class="text-gray-400 text-sm mb-4 line-clamp-2">
+                        استمتع بتجربة Walk The Plank المثيرة في صالة Petra XR.
+                    </p>
+                    <div class="flex items-center justify-between text-xs text-gray-500 border-t border-white/10 pt-3">
+                        <span><i class="fas fa-users mr-1"></i> 1</span>
+                        <span><i class="fas fa-clock mr-1"></i> حسب الحجز</span>
+                    </div>
+                </div>
+            </div>
+            <div class="game-card rounded-2xl group cursor-pointer" data-category="sports" data-title="Racket Pinball">
+                <div class="relative h-64 overflow-hidden">
+                    <img alt="Racket Pinball"
+                        class="w-full h-full object-cover transform group-hover:scale-110 transition duration-700"
+                        loading="lazy"
+                        src="https://cdn.synthesisvr.com/gameassets/svr_79518/header460x215_1751911558.webp" />
+                    <div class="absolute top-3 right-3 z-10">
+                        <span class="badge badge-sports">رياضة</span>
+                    </div>
+                    <div
+                        class="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition duration-300 flex items-center justify-center">
+                        <a class="bg-purple-600 hover:bg-purple-700 text-white px-6 py-2 rounded-full font-bold transform translate-y-4 group-hover:translate-y-0 transition duration-300"
+                            href="https://cdn.synthesisvr.com/gameassets/svr_79518/trailer.mp4" target="_blank">
+                            التفاصيل
+                        </a>
+                    </div>
+                </div>
+                <div class="p-5">
+                    <div class="flex justify-between items-start mb-2">
+                        <h3 class="font-bold text-xl text-white truncate" title="Racket Pinball">Racket Pinball</h3>
+                        <div class="flex text-yellow-500 text-xs">
+                            <i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i
+                                class="fas fa-star"></i>
+                        </div>
+                    </div>
+                    <p class="text-gray-400 text-sm mb-4 line-clamp-2">
+                        استمتع بتجربة Racket Pinball المثيرة في صالة Petra XR.
+                    </p>
+                    <div class="flex items-center justify-between text-xs text-gray-500 border-t border-white/10 pt-3">
+                        <span><i class="fas fa-users mr-1"></i> 1</span>
+                        <span><i class="fas fa-clock mr-1"></i> حسب الحجز</span>
+                    </div>
+                </div>
+            </div>
+            <div class="game-card rounded-2xl group cursor-pointer" data-category="action freeroam"
+                data-title="Greenium Free Roam">
+                <div class="relative h-64 overflow-hidden">
+                    <img alt="Greenium Free Roam"
+                        class="w-full h-full object-cover transform group-hover:scale-110 transition duration-700"
+                        loading="lazy"
+                        src="https://cdn.synthesisvr.com/gameassets/svr_78084/header460x215_1730791263.webp" />
+                    <div class="absolute top-3 right-3 z-10">
+                        <span class="badge badge-action">أكشن</span>
+                    </div>
+                    <div
+                        class="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition duration-300 flex items-center justify-center">
+                        <a class="bg-purple-600 hover:bg-purple-700 text-white px-6 py-2 rounded-full font-bold transform translate-y-4 group-hover:translate-y-0 transition duration-300"
+                            href="https://cdn.synthesisvr.com/gameassets/svr_78084/trailer.mp4" target="_blank">
+                            التفاصيل
+                        </a>
+                    </div>
+                </div>
+                <div class="p-5">
+                    <div class="flex justify-between items-start mb-2">
+                        <h3 class="font-bold text-xl text-white truncate" title="Greenium Free Roam">Greenium Free Roam
+                        </h3>
+                        <div class="flex text-yellow-500 text-xs">
+                            <i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i
+                                class="fas fa-star"></i>
+                        </div>
+                    </div>
+                    <p class="text-gray-400 text-sm mb-4 line-clamp-2">
+                        استمتع بتجربة Greenium Free Roam المثيرة في صالة Petra XR.
+                    </p>
+                    <div class="flex items-center justify-between text-xs text-gray-500 border-t border-white/10 pt-3">
+                        <span><i class="fas fa-users mr-1"></i> 2 - 10</span>
+                        <span><i class="fas fa-clock mr-1"></i> حسب الحجز</span>
+                    </div>
+                </div>
+            </div>
+            <div class="game-card rounded-2xl group cursor-pointer" data-category="cool" data-title="Groovy Labs">
+                <div class="relative h-64 overflow-hidden">
+                    <img alt="Groovy Labs"
+                        class="w-full h-full object-cover transform group-hover:scale-110 transition duration-700"
+                        loading="lazy"
+                        src="https://cdn.synthesisvr.com/gameassets/svr_79111/header460x215_1751916580.webp" />
+                    <div class="absolute top-3 right-3 z-10">
+                        <span class="badge badge-cool">حماس</span>
+                    </div>
+                    <div
+                        class="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition duration-300 flex items-center justify-center">
+                        <a class="bg-purple-600 hover:bg-purple-700 text-white px-6 py-2 rounded-full font-bold transform translate-y-4 group-hover:translate-y-0 transition duration-300"
+                            href="https://cdn.synthesisvr.com/gameassets/svr_79111/trailer.mp4" target="_blank">
+                            التفاصيل
+                        </a>
+                    </div>
+                </div>
+                <div class="p-5">
+                    <div class="flex justify-between items-start mb-2">
+                        <h3 class="font-bold text-xl text-white truncate" title="Groovy Labs">Groovy Labs</h3>
+                        <div class="flex text-yellow-500 text-xs">
+                            <i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i
+                                class="fas fa-star"></i>
+                        </div>
+                    </div>
+                    <p class="text-gray-400 text-sm mb-4 line-clamp-2">
+                        استمتع بتجربة Groovy Labs المثيرة في صالة Petra XR.
+                    </p>
+                    <div class="flex items-center justify-between text-xs text-gray-500 border-t border-white/10 pt-3">
+                        <span><i class="fas fa-users mr-1"></i> 1</span>
+                        <span><i class="fas fa-clock mr-1"></i> حسب الحجز</span>
+                    </div>
+                </div>
+            </div>
+            <div class="game-card rounded-2xl group cursor-pointer" data-category="cool" data-title="FEMPUNKS">
+                <div class="relative h-64 overflow-hidden">
+                    <img alt="FEMPUNKS"
+                        class="w-full h-full object-cover transform group-hover:scale-110 transition duration-700"
+                        loading="lazy"
+                        src="https://cdn.synthesisvr.com/gameassets/svr_79269/header460x215_1747064706.webp" />
+                    <div class="absolute top-3 right-3 z-10">
+                        <span class="badge badge-cool">حماس </span>
+                    </div>
+                    <div
+                        class="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition duration-300 flex items-center justify-center">
+                        <a class="bg-purple-600 hover:bg-purple-700 text-white px-6 py-2 rounded-full font-bold transform translate-y-4 group-hover:translate-y-0 transition duration-300"
+                            href="https://cdn.synthesisvr.com/gameassets/svr_79269/trailer.mp4" target="_blank">
+                            التفاصيل
+                        </a>
+                    </div>
+                </div>
+                <div class="p-5">
+                    <div class="flex justify-between items-start mb-2">
+                        <h3 class="font-bold text-xl text-white truncate" title="FEMPUNKS">FEMPUNKS</h3>
+                        <div class="flex text-yellow-500 text-xs">
+                            <i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i
+                                class="fas fa-star"></i>
+                        </div>
+                    </div>
+                    <p class="text-gray-400 text-sm mb-4 line-clamp-2">
+                        استمتع بتجربة FEMPUNKS المثيرة في صالة Petra XR.
+                    </p>
+                    <div class="flex items-center justify-between text-xs text-gray-500 border-t border-white/10 pt-3">
+                        <span><i class="fas fa-users mr-1"></i> 1</span>
+                        <span><i class="fas fa-clock mr-1"></i> حسب الحجز</span>
+                    </div>
+                </div>
+            </div>
+            <div class="game-card rounded-2xl group cursor-pointer" data-category="action" data-title="One True Path">
+                <div class="relative h-64 overflow-hidden">
+                    <img alt="One True Path"
+                        class="w-full h-full object-cover transform group-hover:scale-110 transition duration-700"
+                        loading="lazy"
+                        src="https://cdn.synthesisvr.com/gameassets/svr_78326/header_1730794967460x215_1741728138.webp" />
+                    <div class="absolute top-3 right-3 z-10">
+                        <span class="badge badge-action">أكشن</span>
+                    </div>
+                    <div
+                        class="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition duration-300 flex items-center justify-center">
+                        <a class="bg-purple-600 hover:bg-purple-700 text-white px-6 py-2 rounded-full font-bold transform translate-y-4 group-hover:translate-y-0 transition duration-300"
+                            href="https://cdn.synthesisvr.com/gameassets/svr_78326/trailer.webm" target="_blank">
+                            التفاصيل
+                        </a>
+                    </div>
+                </div>
+                <div class="p-5">
+                    <div class="flex justify-between items-start mb-2">
+                        <h3 class="font-bold text-xl text-white truncate" title="One True Path">One True Path</h3>
+                        <div class="flex text-yellow-500 text-xs">
+                            <i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i
+                                class="fas fa-star"></i>
+                        </div>
+                    </div>
+                    <p class="text-gray-400 text-sm mb-4 line-clamp-2">
+                        استمتع بتجربة One True Path المثيرة في صالة Petra XR.
+                    </p>
+                    <div class="flex items-center justify-between text-xs text-gray-500 border-t border-white/10 pt-3">
+                        <span><i class="fas fa-users mr-1"></i> 1</span>
+                        <span><i class="fas fa-clock mr-1"></i> حسب الحجز</span>
+                    </div>
+                </div>
+            </div>
+            <div class="game-card rounded-2xl group cursor-pointer" data-category="action" data-title="Grenade Junky">
+                <div class="relative h-64 overflow-hidden">
+                    <img alt="Grenade Junky"
+                        class="w-full h-full object-cover transform group-hover:scale-110 transition duration-700"
+                        loading="lazy"
+                        src="https://cdn.synthesisvr.com/gameassets/svr_78901/header460x215_1745952028.webp" />
+                    <div class="absolute top-3 right-3 z-10">
+                        <span class="badge badge-action">أكشن</span>
+                    </div>
+                    <div
+                        class="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition duration-300 flex items-center justify-center">
+                        <a class="bg-purple-600 hover:bg-purple-700 text-white px-6 py-2 rounded-full font-bold transform translate-y-4 group-hover:translate-y-0 transition duration-300"
+                            href="https://cdn.synthesisvr.com/gameassets/svr_78901/trailer.mp4" target="_blank">
+                            التفاصيل
+                        </a>
+                    </div>
+                </div>
+                <div class="p-5">
+                    <div class="flex justify-between items-start mb-2">
+                        <h3 class="font-bold text-xl text-white truncate" title="Grenade Junky">Grenade Junky</h3>
+                        <div class="flex text-yellow-500 text-xs">
+                            <i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i
+                                class="fas fa-star"></i>
+                        </div>
+                    </div>
+                    <p class="text-gray-400 text-sm mb-4 line-clamp-2">
+                        استمتع بتجربة Grenade Junky المثيرة في صالة Petra XR.
+                    </p>
+                    <div class="flex items-center justify-between text-xs text-gray-500 border-t border-white/10 pt-3">
+                        <span><i class="fas fa-users mr-1"></i> 1 - 6</span>
+                        <span><i class="fas fa-clock mr-1"></i> حسب الحجز</span>
+                    </div>
+                </div>
+            </div>
+            <div class="game-card rounded-2xl group cursor-pointer" data-category="action horror freeroam"
+                data-title="Sinister Inn">
+                <div class="relative h-64 overflow-hidden">
+                    <img alt="Sinister Inn"
+                        class="w-full h-full object-cover transform group-hover:scale-110 transition duration-700"
+                        loading="lazy"
+                        src="https://cdn.synthesisvr.com/gameassets/svr_79001/header_xmas460x215_1764756576.webp" />
+                    <div class="absolute top-3 right-3 z-10">
+                        <span class="badge badge-horror">رعب</span>
+                    </div>
+                    <div
+                        class="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition duration-300 flex items-center justify-center">
+                        <a class="bg-purple-600 hover:bg-purple-700 text-white px-6 py-2 rounded-full font-bold transform translate-y-4 group-hover:translate-y-0 transition duration-300"
+                            href="https://cdn.synthesisvr.com/gameassets/svr_79001/trailer_xmas.mp4" target="_blank">
+                            التفاصيل
+                        </a>
+                    </div>
+                </div>
+                <div class="p-5">
+                    <div class="flex justify-between items-start mb-2">
+                        <h3 class="font-bold text-xl text-white truncate" title="Sinister Inn">Sinister Inn</h3>
+                        <div class="flex text-yellow-500 text-xs">
+                            <i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i
+                                class="fas fa-star"></i>
+                        </div>
+                    </div>
+                    <p class="text-gray-400 text-sm mb-4 line-clamp-2">
+                        استمتع بتجربة Sinister Inn المثيرة في صالة Petra XR.
+                    </p>
+                    <div class="flex items-center justify-between text-xs text-gray-500 border-t border-white/10 pt-3">
+                        <span><i class="fas fa-users mr-1"></i> 1</span>
+                        <span><i class="fas fa-clock mr-1"></i> حسب الحجز</span>
+                    </div>
+                </div>
+            </div>
+            <div class="game-card rounded-2xl group cursor-pointer" data-category="freeroam kids"
+                data-title="The Parvus Box">
+                <div class="relative h-64 overflow-hidden">
+                    <img alt="The Parvus Box"
+                        class="w-full h-full object-cover transform group-hover:scale-110 transition duration-700"
+                        loading="lazy"
+                        src="https://cdn.synthesisvr.com/gameassets/svr_78911/header460x215_1741077105.webp" />
+                    <div class="absolute top-3 right-3 z-10">
+                        <span class="badge badge-kids">عائلة</span>
+                    </div>
+                    <div
+                        class="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition duration-300 flex items-center justify-center">
+                        <a class="bg-purple-600 hover:bg-purple-700 text-white px-6 py-2 rounded-full font-bold transform translate-y-4 group-hover:translate-y-0 transition duration-300"
+                            href="https://cdn.synthesisvr.com/gameassets/svr_78911/trailer2025.webm" target="_blank">
+                            التفاصيل
+                        </a>
+                    </div>
+                </div>
+                <div class="p-5">
+                    <div class="flex justify-between items-start mb-2">
+                        <h3 class="font-bold text-xl text-white truncate" title="The Parvus Box">The Parvus Box</h3>
+                        <div class="flex text-yellow-500 text-xs">
+                            <i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i
+                                class="fas fa-star"></i>
+                        </div>
+                    </div>
+                    <p class="text-gray-400 text-sm mb-4 line-clamp-2">
+                        استمتع بتجربة The Parvus Box المثيرة في صالة Petra XR.
+                    </p>
+                    <div class="flex items-center justify-between text-xs text-gray-500 border-t border-white/10 pt-3">
+                        <span><i class="fas fa-users mr-1"></i> 2 - 6</span>
+                        <span><i class="fas fa-clock mr-1"></i> حسب الحجز</span>
+                    </div>
+                </div>
+            </div>
+            <div class="game-card rounded-2xl group cursor-pointer" data-category="action"
+                data-title="Arizona Sunshine 2: Arcade Edition">
+                <div class="relative h-64 overflow-hidden">
+                    <img alt="Arizona Sunshine 2: Arcade Edition"
+                        class="w-full h-full object-cover transform group-hover:scale-110 transition duration-700"
+                        loading="lazy"
+                        src="https://cdn.synthesisvr.com/gameassets/svr_78407/header460x215_1738911285.webp" />
+                    <div class="absolute top-3 right-3 z-10">
+                        <span class="badge badge-action">أكشن</span>
+                    </div>
+                    <div
+                        class="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition duration-300 flex items-center justify-center">
+                        <a class="bg-purple-600 hover:bg-purple-700 text-white px-6 py-2 rounded-full font-bold transform translate-y-4 group-hover:translate-y-0 transition duration-300"
+                            href="https://cdn.synthesisvr.com/gameassets/svr_78407/trailer.mp4" target="_blank">
+                            التفاصيل
+                        </a>
+                    </div>
+                </div>
+                <div class="p-5">
+                    <div class="flex justify-between items-start mb-2">
+                        <h3 class="font-bold text-xl text-white truncate" title="Arizona Sunshine 2: Arcade Edition">
+                            Arizona Sunshine 2: Arcade Edition</h3>
+                        <div class="flex text-yellow-500 text-xs">
+                            <i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i
+                                class="fas fa-star"></i>
+                        </div>
+                    </div>
+                    <p class="text-gray-400 text-sm mb-4 line-clamp-2">
+                        استمتع بتجربة Arizona Sunshine 2: Arcade Edition المثيرة في صالة Petra XR.
+                    </p>
+                    <div class="flex items-center justify-between text-xs text-gray-500 border-t border-white/10 pt-3">
+                        <span><i class="fas fa-users mr-1"></i> 1 - 4</span>
+                        <span><i class="fas fa-clock mr-1"></i> حسب الحجز</span>
+                    </div>
+                </div>
+            </div>
+            <div class="game-card rounded-2xl group cursor-pointer" data-category="action"
+                data-title="Arizona Sunshine Remake: Arcade Edition">
+                <div class="relative h-64 overflow-hidden">
+                    <img alt="Arizona Sunshine Remake: Arcade Edition"
+                        class="w-full h-full object-cover transform group-hover:scale-110 transition duration-700"
+                        loading="lazy"
+                        src="https://cdn.synthesisvr.com/gameassets/svr_78406/header460x215_1738909811.webp" />
+                    <div class="absolute top-3 right-3 z-10">
+                        <span class="badge badge-action">أكشن</span>
+                    </div>
+                    <div
+                        class="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition duration-300 flex items-center justify-center">
+                        <a class="bg-purple-600 hover:bg-purple-700 text-white px-6 py-2 rounded-full font-bold transform translate-y-4 group-hover:translate-y-0 transition duration-300"
+                            href="https://cdn.synthesisvr.com/gameassets/svr_78406/trailer.mp4" target="_blank">
+                            التفاصيل
+                        </a>
+                    </div>
+                </div>
+                <div class="p-5">
+                    <div class="flex justify-between items-start mb-2">
+                        <h3 class="font-bold text-xl text-white truncate"
+                            title="Arizona Sunshine Remake: Arcade Edition">Arizona Sunshine Remake: Arcade Edition</h3>
+                        <div class="flex text-yellow-500 text-xs">
+                            <i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i
+                                class="fas fa-star"></i>
+                        </div>
+                    </div>
+                    <p class="text-gray-400 text-sm mb-4 line-clamp-2">
+                        استمتع بتجربة Arizona Sunshine Remake: Arcade Edition المثيرة في صالة Petra XR.
+                    </p>
+                    <div class="flex items-center justify-between text-xs text-gray-500 border-t border-white/10 pt-3">
+                        <span><i class="fas fa-users mr-1"></i> 1 - 4</span>
+                        <span><i class="fas fa-clock mr-1"></i> حسب الحجز</span>
+                    </div>
+                </div>
+            </div>
+            <div class="game-card rounded-2xl group cursor-pointer" data-category="kids freeroam"
+                data-title="The Smurfs, Blueberry Battle">
+                <div class="relative h-64 overflow-hidden">
+                    <img alt="The Smurfs, Blueberry Battle"
+                        class="w-full h-full object-cover transform group-hover:scale-110 transition duration-700"
+                        loading="lazy"
+                        src="https://cdn.synthesisvr.com/gameassets/svr_37837/header460x215_1727855823.webp" />
+                    <div class="absolute top-3 right-3 z-10">
+                        <span class="badge badge-kids">عائلة</span>
+                    </div>
+                    <div
+                        class="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition duration-300 flex items-center justify-center">
+                        <a class="bg-purple-600 hover:bg-purple-700 text-white px-6 py-2 rounded-full font-bold transform translate-y-4 group-hover:translate-y-0 transition duration-300"
+                            href="https://cdn.synthesisvr.com/gameassets/svr_37837/trailer_v2.mp4" target="_blank">
+                            التفاصيل
+                        </a>
+                    </div>
+                </div>
+                <div class="p-5">
+                    <div class="flex justify-between items-start mb-2">
+                        <h3 class="font-bold text-xl text-white truncate" title="The Smurfs, Blueberry Battle">The
+                            Smurfs, Blueberry Battle</h3>
+                        <div class="flex text-yellow-500 text-xs">
+                            <i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i
+                                class="fas fa-star"></i>
+                        </div>
+                    </div>
+                    <p class="text-gray-400 text-sm mb-4 line-clamp-2">
+                        استمتع بتجربة The Smurfs, Blueberry Battle المثيرة في صالة Petra XR.
+                    </p>
+                    <div class="flex items-center justify-between text-xs text-gray-500 border-t border-white/10 pt-3">
+                        <span><i class="fas fa-users mr-1"></i> 1 - 10</span>
+                        <span><i class="fas fa-clock mr-1"></i> حسب الحجز</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="game-card rounded-2xl group cursor-pointer" data-category="action freeroam"
+                data-title="Ultimate Battle Royale">
+                <div class="relative h-64 overflow-hidden">
+                    <img alt="Ultimate Battle Royale"
+                        class="w-full h-full object-cover transform group-hover:scale-110 transition duration-700"
+                        loading="lazy"
+                        src="https://cdn.synthesisvr.com/gameassets/svr_57907/header460x215_1734339943.webp" />
+                    <div class="absolute top-3 right-3 z-10">
+                        <span class="badge badge-action">أكشن</span>
+                    </div>
+                    <div
+                        class="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition duration-300 flex items-center justify-center">
+                        <a class="bg-purple-600 hover:bg-purple-700 text-white px-6 py-2 rounded-full font-bold transform translate-y-4 group-hover:translate-y-0 transition duration-300"
+                            href="https://cdn.synthesisvr.com/gameassets/svr_57907/trailer.webm" target="_blank">
+                            التفاصيل
+                        </a>
+                    </div>
+                </div>
+                <div class="p-5">
+                    <div class="flex justify-between items-start mb-2">
+                        <h3 class="font-bold text-xl text-white truncate" title="Ultimate Battle Royale">Ultimate Battle
+                            Royale</h3>
+                        <div class="flex text-yellow-500 text-xs">
+                            <i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i
+                                class="fas fa-star"></i>
+                        </div>
+                    </div>
+                    <p class="text-gray-400 text-sm mb-4 line-clamp-2">
+                        استمتع بتجربة Ultimate Battle Royale المثيرة في صالة Petra XR.
+                    </p>
+                    <div class="flex items-center justify-between text-xs text-gray-500 border-t border-white/10 pt-3">
+                        <span><i class="fas fa-users mr-1"></i> 1 - 10</span>
+                        <span><i class="fas fa-clock mr-1"></i> حسب الحجز</span>
+                    </div>
+                </div>
+            </div>
+            <div class="game-card rounded-2xl group cursor-pointer" data-category="kids" data-title="Riddle of Ruins">
+                <div class="relative h-64 overflow-hidden">
+                    <img alt="Riddle of Ruins"
+                        class="w-full h-full object-cover transform group-hover:scale-110 transition duration-700"
+                        loading="lazy"
+                        src="https://cdn.synthesisvr.com/gameassets/svr_78307/header460x215_1731422933.webp" />
+                    <div class="absolute top-3 right-3 z-10">
+                        <span class="badge badge-kids">عائلة</span>
+                    </div>
+                    <div
+                        class="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition duration-300 flex items-center justify-center">
+                        <a class="bg-purple-600 hover:bg-purple-700 text-white px-6 py-2 rounded-full font-bold transform translate-y-4 group-hover:translate-y-0 transition duration-300"
+                            href="https://cdn.synthesisvr.com/gameassets/svr_78307/trailer.mp4" target="_blank">
+                            التفاصيل
+                        </a>
+                    </div>
+                </div>
+                <div class="p-5">
+                    <div class="flex justify-between items-start mb-2">
+                        <h3 class="font-bold text-xl text-white truncate" title="Riddle of Ruins">Riddle of Ruins</h3>
+                        <div class="flex text-yellow-500 text-xs">
+                            <i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i
+                                class="fas fa-star"></i>
+                        </div>
+                    </div>
+                    <p class="text-gray-400 text-sm mb-4 line-clamp-2">
+                        استمتع بتجربة Riddle of Ruins المثيرة في صالة Petra XR.
+                    </p>
+                    <div class="flex items-center justify-between text-xs text-gray-500 border-t border-white/10 pt-3">
+                        <span><i class="fas fa-users mr-1"></i> 1 - 6</span>
+                        <span><i class="fas fa-clock mr-1"></i> حسب الحجز</span>
+                    </div>
+                </div>
+            </div>
+            <div class="game-card rounded-2xl group cursor-pointer" data-category="kids" data-title="Arctic Olympics">
+                <div class="relative h-64 overflow-hidden">
+                    <img alt="Arctic Olympics"
+                        class="w-full h-full object-cover transform group-hover:scale-110 transition duration-700"
+                        loading="lazy"
+                        src="https://cdn.synthesisvr.com/gameassets/svr_67560/header_rs460x215_1723620728.webp" />
+                    <div class="absolute top-3 right-3 z-10">
+                        <span class="badge badge-kids">عائلة</span>
+                    </div>
+                    <div
+                        class="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition duration-300 flex items-center justify-center">
+                        <a class="bg-purple-600 hover:bg-purple-700 text-white px-6 py-2 rounded-full font-bold transform translate-y-4 group-hover:translate-y-0 transition duration-300"
+                            href="https://cdn.synthesisvr.com/gameassets/svr_67560/trailer.webm" target="_blank">
+                            التفاصيل
+                        </a>
+                    </div>
+                </div>
+                <div class="p-5">
+                    <div class="flex justify-between items-start mb-2">
+                        <h3 class="font-bold text-xl text-white truncate" title="Arctic Olympics">Arctic Olympics</h3>
+                        <div class="flex text-yellow-500 text-xs">
+                            <i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i
+                                class="fas fa-star"></i>
+                        </div>
+                    </div>
+                    <p class="text-gray-400 text-sm mb-4 line-clamp-2">
+                        استمتع بتجربة Arctic Olympics المثيرة في صالة Petra XR.
+                    </p>
+                    <div class="flex items-center justify-between text-xs text-gray-500 border-t border-white/10 pt-3">
+                        <span><i class="fas fa-users mr-1"></i> 1 - 8</span>
+                        <span><i class="fas fa-clock mr-1"></i> حسب الحجز</span>
+                    </div>
+                </div>
+            </div>
+            <div class="game-card rounded-2xl group cursor-pointer" data-category="kids freeroam"
+                data-title="Arctic Olympics Arena">
+                <div class="relative h-64 overflow-hidden">
+                    <img alt="Arctic Olympics Arena"
+                        class="w-full h-full object-cover transform group-hover:scale-110 transition duration-700"
+                        loading="lazy"
+                        src="https://cdn.synthesisvr.com/gameassets/svr_67561/header_fr460x215_1723620637.webp" />
+                    <div class="absolute top-3 right-3 z-10">
+                        <span class="badge badge-kids">عائلة</span>
+                    </div>
+                    <div
+                        class="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition duration-300 flex items-center justify-center">
+                        <a class="bg-purple-600 hover:bg-purple-700 text-white px-6 py-2 rounded-full font-bold transform translate-y-4 group-hover:translate-y-0 transition duration-300"
+                            href="https://cdn.synthesisvr.com/gameassets/svr_67561/trailer.webm" target="_blank">
+                            التفاصيل
+                        </a>
+                    </div>
+                </div>
+                <div class="p-5">
+                    <div class="flex justify-between items-start mb-2">
+                        <h3 class="font-bold text-xl text-white truncate" title="Arctic Olympics Arena">Arctic Olympics
+                            Arena</h3>
+                        <div class="flex text-yellow-500 text-xs">
+                            <i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i
+                                class="fas fa-star"></i>
+                        </div>
+                    </div>
+                    <p class="text-gray-400 text-sm mb-4 line-clamp-2">
+                        استمتع بتجربة Arctic Olympics Arena المثيرة في صالة Petra XR.
+                    </p>
+                    <div class="flex items-center justify-between text-xs text-gray-500 border-t border-white/10 pt-3">
+                        <span><i class="fas fa-users mr-1"></i> 1 - 8</span>
+                        <span><i class="fas fa-clock mr-1"></i> حسب الحجز</span>
+                    </div>
+                </div>
+            </div>
+            <div class="game-card rounded-2xl group cursor-pointer" data-category="kids" data-title="CINEXT VR">
+                <div class="relative h-64 overflow-hidden">
+                    <img alt="CINEXT VR"
+                        class="w-full h-full object-cover transform group-hover:scale-110 transition duration-700"
+                        loading="lazy" src="https://cdn.synthesisvr.com/gameassets/svr_77874/catalogue.png" />
+                    <div class="absolute top-3 right-3 z-10">
+                        <span class="badge badge-kids">عائلة</span>
+                    </div>
+                    <div
+                        class="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition duration-300 flex items-center justify-center">
+                        <a class="bg-purple-600 hover:bg-purple-700 text-white px-6 py-2 rounded-full font-bold transform translate-y-4 group-hover:translate-y-0 transition duration-300"
+                            href="https://cdn.synthesisvr.com/gameassets/svr_77874/trailer.mp4" target="_blank">
+                            التفاصيل
+                        </a>
+                    </div>
+                </div>
+                <div class="p-5">
+                    <div class="flex justify-between items-start mb-2">
+                        <h3 class="font-bold text-xl text-white truncate" title="CINEXT VR">CINEXT VR</h3>
+                        <div class="flex text-yellow-500 text-xs">
+                            <i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i
+                                class="fas fa-star"></i>
+                        </div>
+                    </div>
+                    <p class="text-gray-400 text-sm mb-4 line-clamp-2">
+                        استمتع بتجربة CINEXT VR المثيرة في صالة Petra XR.
+                    </p>
+                    <div class="flex items-center justify-between text-xs text-gray-500 border-t border-white/10 pt-3">
+                        <span><i class="fas fa-users mr-1"></i> 1 - 12</span>
+                        <span><i class="fas fa-clock mr-1"></i> حسب الحجز</span>
+                    </div>
+                </div>
+            </div>
+            <div class="game-card rounded-2xl group cursor-pointer" data-category="kids" data-title="Space Drop">
+                <div class="relative h-64 overflow-hidden">
+                    <img alt="Space Drop"
+                        class="w-full h-full object-cover transform group-hover:scale-110 transition duration-700"
+                        loading="lazy"
+                        src="https://cdn.synthesisvr.com/gameassets/svr_77910/header_1727797471460x215_1727814736.webp" />
+                    <div class="absolute top-3 right-3 z-10">
+                        <span class="badge badge-kids">عائلة</span>
+                    </div>
+                    <div
+                        class="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition duration-300 flex items-center justify-center">
+                        <a class="bg-purple-600 hover:bg-purple-700 text-white px-6 py-2 rounded-full font-bold transform translate-y-4 group-hover:translate-y-0 transition duration-300"
+                            href="https://cdn.synthesisvr.com/gameassets/svr_77910/trailer.webm" target="_blank">
+                            التفاصيل
+                        </a>
+                    </div>
+                </div>
+                <div class="p-5">
+                    <div class="flex justify-between items-start mb-2">
+                        <h3 class="font-bold text-xl text-white truncate" title="Space Drop">Space Drop</h3>
+                        <div class="flex text-yellow-500 text-xs">
+                            <i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i
+                                class="fas fa-star"></i>
+                        </div>
+                    </div>
+                    <p class="text-gray-400 text-sm mb-4 line-clamp-2">
+                        استمتع بتجربة Space Drop المثيرة في صالة Petra XR.
+                    </p>
+                    <div class="flex items-center justify-between text-xs text-gray-500 border-t border-white/10 pt-3">
+                        <span><i class="fas fa-users mr-1"></i> 1</span>
+                        <span><i class="fas fa-clock mr-1"></i> حسب الحجز</span>
+                    </div>
+                </div>
+            </div>
+            <div class="game-card rounded-2xl group cursor-pointer" data-category="action" data-title="Pixel Hack">
+                <div class="relative h-64 overflow-hidden">
+                    <img alt="Pixel Hack"
+                        class="w-full h-full object-cover transform group-hover:scale-110 transition duration-700"
+                        loading="lazy"
+                        src="https://cdn.synthesisvr.com/gameassets/svr_37324/header460x215_1720421660.webp" />
+                    <div class="absolute top-3 right-3 z-10">
+                        <span class="badge badge-action">أكشن</span>
+                    </div>
+                    <div
+                        class="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition duration-300 flex items-center justify-center">
+                        <a class="bg-purple-600 hover:bg-purple-700 text-white px-6 py-2 rounded-full font-bold transform translate-y-4 group-hover:translate-y-0 transition duration-300"
+                            href="https://cdn.synthesisvr.com/gameassets/svr_37324/trailer.webm" target="_blank">
+                            التفاصيل
+                        </a>
+                    </div>
+                </div>
+                <div class="p-5">
+                    <div class="flex justify-between items-start mb-2">
+                        <h3 class="font-bold text-xl text-white truncate" title="Pixel Hack">Pixel Hack</h3>
+                        <div class="flex text-yellow-500 text-xs">
+                            <i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i
+                                class="fas fa-star"></i>
+                        </div>
+                    </div>
+                    <p class="text-gray-400 text-sm mb-4 line-clamp-2">
+                        استمتع بتجربة Pixel Hack المثيرة في صالة Petra XR.
+                    </p>
+                    <div class="flex items-center justify-between text-xs text-gray-500 border-t border-white/10 pt-3">
+                        <span><i class="fas fa-users mr-1"></i> 1 - 4</span>
+                        <span><i class="fas fa-clock mr-1"></i> حسب الحجز</span>
+                    </div>
+                </div>
+            </div>
+            <div class="game-card rounded-2xl group cursor-pointer" data-category="action freeroam"
+                data-title="Virtual Arena">
+                <div class="relative h-64 overflow-hidden">
+                    <img alt="Virtual Arena"
+                        class="w-full h-full object-cover transform group-hover:scale-110 transition duration-700"
+                        loading="lazy"
+                        src="https://cdn.synthesisvr.com/gameassets/svr_12426/header460x215_1717063071.webp" />
+                    <div class="absolute top-3 right-3 z-10">
+                        <span class="badge badge-action">أكشن</span>
+                    </div>
+                    <div
+                        class="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition duration-300 flex items-center justify-center">
+                        <a class="bg-purple-600 hover:bg-purple-700 text-white px-6 py-2 rounded-full font-bold transform translate-y-4 group-hover:translate-y-0 transition duration-300"
+                            href="https://cdn.synthesisvr.com/gameassets/svr_12426/trailer.mp4" target="_blank">
+                            التفاصيل
+                        </a>
+                    </div>
+                </div>
+                <div class="p-5">
+                    <div class="flex justify-between items-start mb-2">
+                        <h3 class="font-bold text-xl text-white truncate" title="Virtual Arena">Virtual Arena</h3>
+                        <div class="flex text-yellow-500 text-xs">
+                            <i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i
+                                class="fas fa-star"></i>
+                        </div>
+                    </div>
+                    <p class="text-gray-400 text-sm mb-4 line-clamp-2">
+                        استمتع بتجربة Virtual Arena المثيرة في صالة Petra XR.
+                    </p>
+                    <div class="flex items-center justify-between text-xs text-gray-500 border-t border-white/10 pt-3">
+                        <span><i class="fas fa-users mr-1"></i> 1</span>
+                        <span><i class="fas fa-clock mr-1"></i> حسب الحجز</span>
+                    </div>
+                </div>
+            </div>
+            <div class="game-card rounded-2xl group cursor-pointer" data-category="sports" data-title="Killer Tennis">
+                <div class="relative h-64 overflow-hidden">
+                    <img alt="Killer Tennis"
+                        class="w-full h-full object-cover transform group-hover:scale-110 transition duration-700"
+                        loading="lazy"
+                        src="https://cdn.synthesisvr.com/gameassets/svr_5942/header460x215_1711630763.webp" />
+                    <div class="absolute top-3 right-3 z-10">
+                        <span class="badge badge-sports">رياضة</span>
+                    </div>
+                    <div
+                        class="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition duration-300 flex items-center justify-center">
+                        <a class="bg-purple-600 hover:bg-purple-700 text-white px-6 py-2 rounded-full font-bold transform translate-y-4 group-hover:translate-y-0 transition duration-300"
+                            href="https://cdn.synthesisvr.com/gameassets/svr_5942/trailer.mp4" target="_blank">
+                            التفاصيل
+                        </a>
+                    </div>
+                </div>
+                <div class="p-5">
+                    <div class="flex justify-between items-start mb-2">
+                        <h3 class="font-bold text-xl text-white truncate" title="Killer Tennis">Killer Tennis</h3>
+                        <div class="flex text-yellow-500 text-xs">
+                            <i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i
+                                class="fas fa-star"></i>
+                        </div>
+                    </div>
+                    <p class="text-gray-400 text-sm mb-4 line-clamp-2">
+                        استمتع بتجربة Killer Tennis المثيرة في صالة Petra XR.
+                    </p>
+                    <div class="flex items-center justify-between text-xs text-gray-500 border-t border-white/10 pt-3">
+                        <span><i class="fas fa-users mr-1"></i> 2 - 4</span>
+                        <span><i class="fas fa-clock mr-1"></i> حسب الحجز</span>
+                    </div>
+                </div>
+            </div>
+            <div class="game-card rounded-2xl group cursor-pointer" data-category="action"
+                data-title="Death Horizon: Reloaded">
+                <div class="relative h-64 overflow-hidden">
+                    <img alt="Death Horizon: Reloaded"
+                        class="w-full h-full object-cover transform group-hover:scale-110 transition duration-700"
+                        loading="lazy"
+                        src="https://cdn.synthesisvr.com/gameassets/svr_20976/header460x215_1697466709.webp" />
+                    <div class="absolute top-3 right-3 z-10">
+                        <span class="badge badge-action">أكشن</span>
+                    </div>
+                    <div
+                        class="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition duration-300 flex items-center justify-center">
+                        <a class="bg-purple-600 hover:bg-purple-700 text-white px-6 py-2 rounded-full font-bold transform translate-y-4 group-hover:translate-y-0 transition duration-300"
+                            href="https://cdn.synthesisvr.com/gameassets/svr_20976/trailer.webm" target="_blank">
+                            التفاصيل
+                        </a>
+                    </div>
+                </div>
+                <div class="p-5">
+                    <div class="flex justify-between items-start mb-2">
+                        <h3 class="font-bold text-xl text-white truncate" title="Death Horizon: Reloaded">Death Horizon:
+                            Reloaded</h3>
+                        <div class="flex text-yellow-500 text-xs">
+                            <i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i
+                                class="fas fa-star"></i>
+                        </div>
+                    </div>
+                    <p class="text-gray-400 text-sm mb-4 line-clamp-2">
+                        استمتع بتجربة Death Horizon: Reloaded المثيرة في صالة Petra XR.
+                    </p>
+                    <div class="flex items-center justify-between text-xs text-gray-500 border-t border-white/10 pt-3">
+                        <span><i class="fas fa-users mr-1"></i> 1 - 2</span>
+                        <span><i class="fas fa-clock mr-1"></i> حسب الحجز</span>
+                    </div>
+                </div>
+            </div>
+            <div class="game-card rounded-2xl group cursor-pointer" data-category="action"
+                data-title="Elven Assassin Arcade">
+                <div class="relative h-64 overflow-hidden">
+                    <img alt="Elven Assassin Arcade"
+                        class="w-full h-full object-cover transform group-hover:scale-110 transition duration-700"
+                        loading="lazy"
+                        src="https://cdn.synthesisvr.com/gameassets/svr_33685/header460x215_1707213306.webp" />
+                    <div class="absolute top-3 right-3 z-10">
+                        <span class="badge badge-action">أكشن</span>
+                    </div>
+                    <div
+                        class="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition duration-300 flex items-center justify-center">
+                        <a class="bg-purple-600 hover:bg-purple-700 text-white px-6 py-2 rounded-full font-bold transform translate-y-4 group-hover:translate-y-0 transition duration-300"
+                            href="https://cdn.synthesisvr.com/gameassets/svr_33685/trailer.mp4" target="_blank">
+                            التفاصيل
+                        </a>
+                    </div>
+                </div>
+                <div class="p-5">
+                    <div class="flex justify-between items-start mb-2">
+                        <h3 class="font-bold text-xl text-white truncate" title="Elven Assassin Arcade">Elven Assassin
+                            Arcade</h3>
+                        <div class="flex text-yellow-500 text-xs">
+                            <i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i
+                                class="fas fa-star"></i>
+                        </div>
+                    </div>
+                    <p class="text-gray-400 text-sm mb-4 line-clamp-2">
+                        استمتع بتجربة Elven Assassin Arcade المثيرة في صالة Petra XR.
+                    </p>
+                    <div class="flex items-center justify-between text-xs text-gray-500 border-t border-white/10 pt-3">
+                        <span><i class="fas fa-users mr-1"></i> 1 - 8</span>
+                        <span><i class="fas fa-clock mr-1"></i> حسب الحجز</span>
+                    </div>
+                </div>
+            </div>
+            <div class="game-card rounded-2xl group cursor-pointer" data-category="sports" data-title="Electroball">
+                <div class="relative h-64 overflow-hidden">
+                    <img alt="Electroball"
+                        class="w-full h-full object-cover transform group-hover:scale-110 transition duration-700"
+                        loading="lazy"
+                        src="https://cdn.synthesisvr.com/gameassets/svr_28234/header460x215_1722438985.webp" />
+                    <div class="absolute top-3 right-3 z-10">
+                        <span class="badge badge-sports">رياضة</span>
+                    </div>
+                    <div
+                        class="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition duration-300 flex items-center justify-center">
+                        <a class="bg-purple-600 hover:bg-purple-700 text-white px-6 py-2 rounded-full font-bold transform translate-y-4 group-hover:translate-y-0 transition duration-300"
+                            href="https://cdn.synthesisvr.com/gameassets/svr_28234/trailer.webm" target="_blank">
+                            التفاصيل
+                        </a>
+                    </div>
+                </div>
+                <div class="p-5">
+                    <div class="flex justify-between items-start mb-2">
+                        <h3 class="font-bold text-xl text-white truncate" title="Electroball">Electroball</h3>
+                        <div class="flex text-yellow-500 text-xs">
+                            <i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i
+                                class="fas fa-star"></i>
+                        </div>
+                    </div>
+                    <p class="text-gray-400 text-sm mb-4 line-clamp-2">
+                        استمتع بتجربة Electroball المثيرة في صالة Petra XR.
+                    </p>
+                    <div class="flex items-center justify-between text-xs text-gray-500 border-t border-white/10 pt-3">
+                        <span><i class="fas fa-users mr-1"></i> 2 - 4</span>
+                        <span><i class="fas fa-clock mr-1"></i> حسب الحجز</span>
+                    </div>
+                </div>
+            </div>
+            <div class="game-card rounded-2xl group cursor-pointer" data-category="sports" data-title="Gravity League">
+                <div class="relative h-64 overflow-hidden">
+                    <img alt="Gravity League"
+                        class="w-full h-full object-cover transform group-hover:scale-110 transition duration-700"
+                        loading="lazy"
+                        src="https://cdn.synthesisvr.com/gameassets/svr_28202/header460x215_1699016315.webp" />
+                    <div class="absolute top-3 right-3 z-10">
+                        <span class="badge badge-sports">رياضة</span>
+                    </div>
+                    <div
+                        class="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition duration-300 flex items-center justify-center">
+                        <a class="bg-purple-600 hover:bg-purple-700 text-white px-6 py-2 rounded-full font-bold transform translate-y-4 group-hover:translate-y-0 transition duration-300"
+                            href="https://cdn.akamai.steamstatic.com/steam/apps/256964121/movie480.mp4?t=1692263693"
+                            target="_blank">
+                            التفاصيل
+                        </a>
+                    </div>
+                </div>
+                <div class="p-5">
+                    <div class="flex justify-between items-start mb-2">
+                        <h3 class="font-bold text-xl text-white truncate" title="Gravity League">Gravity League</h3>
+                        <div class="flex text-yellow-500 text-xs">
+                            <i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i
+                                class="fas fa-star"></i>
+                        </div>
+                    </div>
+                    <p class="text-gray-400 text-sm mb-4 line-clamp-2">
+                        استمتع بتجربة Gravity League المثيرة في صالة Petra XR.
+                    </p>
+                    <div class="flex items-center justify-between text-xs text-gray-500 border-t border-white/10 pt-3">
+                        <span><i class="fas fa-users mr-1"></i> 1 - 4</span>
+                        <span><i class="fas fa-clock mr-1"></i> حسب الحجز</span>
+                    </div>
+                </div>
+            </div>
+
+
+
+            <div class="game-card rounded-2xl group cursor-pointer" data-category="cool" data-title="The Break-In">
+                <div class="relative h-64 overflow-hidden">
+                    <img alt="The Break-In"
+                        class="w-full h-full object-cover transform group-hover:scale-110 transition duration-700"
+                        loading="lazy"
+                        src="https://cdn.synthesisvr.com/gameassets/svr_13449/header460x215_1681920848.webp" />
+                    <div class="absolute top-3 right-3 z-10">
+                        <span class="badge badge-cool">حماس</span>
+                    </div>
+                    <div
+                        class="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition duration-300 flex items-center justify-center">
+                        <a class="bg-purple-600 hover:bg-purple-700 text-white px-6 py-2 rounded-full font-bold transform translate-y-4 group-hover:translate-y-0 transition duration-300"
+                            href="https://cdn.synthesisvr.com/gameassets/svr_13449/trailer.mp4" target="_blank">
+                            التفاصيل
+                        </a>
+                    </div>
+                </div>
+                <div class="p-5">
+                    <div class="flex justify-between items-start mb-2">
+                        <h3 class="font-bold text-xl text-white truncate" title="The Break-In">The Break-In</h3>
+                        <div class="flex text-yellow-500 text-xs">
+                            <i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i
+                                class="fas fa-star"></i>
+                        </div>
+                    </div>
+                    <p class="text-gray-400 text-sm mb-4 line-clamp-2">
+                        استمتع بتجربة The Break-In المثيرة في صالة Petra XR.
+                    </p>
+                    <div class="flex items-center justify-between text-xs text-gray-500 border-t border-white/10 pt-3">
+                        <span><i class="fas fa-users mr-1"></i> 1 - 4</span>
+                        <span><i class="fas fa-clock mr-1"></i> حسب الحجز</span>
+                    </div>
+                </div>
+            </div>
+            <div class="game-card rounded-2xl group cursor-pointer" data-category="horror"
+                data-title="Ghosts of Mist Harbor Mansion">
+                <div class="relative h-64 overflow-hidden">
+                    <img alt="Ghosts of Mist Harbor Mansion"
+                        class="w-full h-full object-cover transform group-hover:scale-110 transition duration-700"
+                        loading="lazy"
+                        src="https://cdn.synthesisvr.com/gameassets/svr_23653/logo460x215_1692001010.webp" />
+                    <div class="absolute top-3 right-3 z-10">
+                        <span class="badge badge-horror">رعب</span>
+                    </div>
+                    <div
+                        class="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition duration-300 flex items-center justify-center">
+                        <a class="bg-purple-600 hover:bg-purple-700 text-white px-6 py-2 rounded-full font-bold transform translate-y-4 group-hover:translate-y-0 transition duration-300"
+                            href="https://cdn.synthesisvr.com/gameassets/svr_23653/mistharborcut.mp4" target="_blank">
+                            التفاصيل
+                        </a>
+                    </div>
+                </div>
+                <div class="p-5">
+                    <div class="flex justify-between items-start mb-2">
+                        <h3 class="font-bold text-xl text-white truncate" title="Ghosts of Mist Harbor Mansion">Ghosts
+                            of Mist Harbor Mansion</h3>
+                        <div class="flex text-yellow-500 text-xs">
+                            <i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i
+                                class="fas fa-star"></i>
+                        </div>
+                    </div>
+                    <p class="text-gray-400 text-sm mb-4 line-clamp-2">
+                        استمتع بتجربة Ghosts of Mist Harbor Mansion المثيرة في صالة Petra XR.
+                    </p>
+                    <div class="flex items-center justify-between text-xs text-gray-500 border-t border-white/10 pt-3">
+                        <span><i class="fas fa-users mr-1"></i> 1 - 4</span>
+                        <span><i class="fas fa-clock mr-1"></i> حسب الحجز</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="game-card rounded-2xl group cursor-pointer" data-category="action freeroam"
+                data-title="Last Resistance">
+                <div class="relative h-64 overflow-hidden">
+                    <img alt="Last Resistance"
+                        class="w-full h-full object-cover transform group-hover:scale-110 transition duration-700"
+                        loading="lazy"
+                        src="https://cdn.synthesisvr.com/gameassets/svr_20316/header460x215_1691568887.webp" />
+                    <div class="absolute top-3 right-3 z-10">
+                        <span class="badge badge-action">أكشن</span>
+                    </div>
+                    <div
+                        class="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition duration-300 flex items-center justify-center">
+                        <a class="bg-purple-600 hover:bg-purple-700 text-white px-6 py-2 rounded-full font-bold transform translate-y-4 group-hover:translate-y-0 transition duration-300"
+                            href="https://cdn.synthesisvr.com/gameassets/svr_20316/trailer.webm" target="_blank">
+                            التفاصيل
+                        </a>
+                    </div>
+                </div>
+                <div class="p-5">
+                    <div class="flex justify-between items-start mb-2">
+                        <h3 class="font-bold text-xl text-white truncate" title="Last Resistance">Last Resistance</h3>
+                        <div class="flex text-yellow-500 text-xs">
+                            <i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i
+                                class="fas fa-star"></i>
+                        </div>
+                    </div>
+                    <p class="text-gray-400 text-sm mb-4 line-clamp-2">
+                        استمتع بتجربة Last Resistance المثيرة في صالة Petra XR.
+                    </p>
+                    <div class="flex items-center justify-between text-xs text-gray-500 border-t border-white/10 pt-3">
+                        <span><i class="fas fa-users mr-1"></i> 1 - 4</span>
+                        <span><i class="fas fa-clock mr-1"></i> حسب الحجز</span>
+                    </div>
+                </div>
+            </div>
+            <div class="game-card rounded-2xl group cursor-pointer" data-category="action freeroam"
+                data-title="Fate Unbound VR">
+                <div class="relative h-64 overflow-hidden">
+                    <img alt="Fate Unbound VR"
+                        class="w-full h-full object-cover transform group-hover:scale-110 transition duration-700"
+                        loading="lazy"
+                        src="https://cdn.synthesisvr.com/gameassets/svr_20315/header460x215_1691568780.webp" />
+                    <div class="absolute top-3 right-3 z-10">
+                        <span class="badge badge-action">أكشن</span>
+                    </div>
+                    <div
+                        class="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition duration-300 flex items-center justify-center">
+                        <a class="bg-purple-600 hover:bg-purple-700 text-white px-6 py-2 rounded-full font-bold transform translate-y-4 group-hover:translate-y-0 transition duration-300"
+                            href="https://cdn.synthesisvr.com/gameassets/svr_20315/trailer.webm" target="_blank">
+                            التفاصيل
+                        </a>
+                    </div>
+                </div>
+                <div class="p-5">
+                    <div class="flex justify-between items-start mb-2">
+                        <h3 class="font-bold text-xl text-white truncate" title="Fate Unbound VR">Fate Unbound VR</h3>
+                        <div class="flex text-yellow-500 text-xs">
+                            <i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i
+                                class="fas fa-star"></i>
+                        </div>
+                    </div>
+                    <p class="text-gray-400 text-sm mb-4 line-clamp-2">
+                        استمتع بتجربة Fate Unbound VR المثيرة في صالة Petra XR.
+                    </p>
+                    <div class="flex items-center justify-between text-xs text-gray-500 border-t border-white/10 pt-3">
+                        <span><i class="fas fa-users mr-1"></i> 1 - 4</span>
+                        <span><i class="fas fa-clock mr-1"></i> حسب الحجز</span>
+                    </div>
+                </div>
+            </div>
+            <div class="game-card rounded-2xl group cursor-pointer" data-category="action freeroam"
+                data-title="B Block Breakout">
+                <div class="relative h-64 overflow-hidden">
+                    <img alt="B Block Breakout"
+                        class="w-full h-full object-cover transform group-hover:scale-110 transition duration-700"
+                        loading="lazy"
+                        src="https://cdn.synthesisvr.com/gameassets/svr_20169/header460x215_1689228889.webp" />
+                    <div class="absolute top-3 right-3 z-10">
+                        <span class="badge badge-action">ألغاز</span>
+                    </div>
+                    <div
+                        class="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition duration-300 flex items-center justify-center">
+                        <a class="bg-purple-600 hover:bg-purple-700 text-white px-6 py-2 rounded-full font-bold transform translate-y-4 group-hover:translate-y-0 transition duration-300"
+                            href="https://cdn.synthesisvr.com/gameassets/svr_20169/trailer.mp4" target="_blank">
+                            التفاصيل
+                        </a>
+                    </div>
+                </div>
+                <div class="p-5">
+                    <div class="flex justify-between items-start mb-2">
+                        <h3 class="font-bold text-xl text-white truncate" title="B Block Breakout">B Block Breakout</h3>
+                        <div class="flex text-yellow-500 text-xs">
+                            <i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i
+                                class="fas fa-star"></i>
+                        </div>
+                    </div>
+                    <p class="text-gray-400 text-sm mb-4 line-clamp-2">
+                        استمتع بتجربة B Block Breakout المثيرة في صالة Petra XR.
+                    </p>
+                    <div class="flex items-center justify-between text-xs text-gray-500 border-t border-white/10 pt-3">
+                        <span><i class="fas fa-users mr-1"></i> 2 - 6</span>
+                        <span><i class="fas fa-clock mr-1"></i> حسب الحجز</span>
+                    </div>
+                </div>
+            </div>
+
+
+            <div class="game-card rounded-2xl group cursor-pointer" data-category="action freeroam"
+                data-title="After The Fall: Free-Roam">
+                <div class="relative h-64 overflow-hidden">
+                    <img alt="After The Fall: Free-Roam"
+                        class="w-full h-full object-cover transform group-hover:scale-110 transition duration-700"
+                        loading="lazy"
+                        src="https://cdn.synthesisvr.com/gameassets/svr_78903/header460x215_1756809906.webp" />
+                    <div class="absolute top-3 right-3 z-10">
+                        <span class="badge badge-action">أكشن</span>
+                    </div>
+                    <div
+                        class="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition duration-300 flex items-center justify-center">
+                        <a class="bg-purple-600 hover:bg-purple-700 text-white px-6 py-2 rounded-full font-bold transform translate-y-4 group-hover:translate-y-0 transition duration-300"
+                            href="" target="_blank">
+                            التفاصيل
+                        </a>
+                    </div>
+                </div>
+                <div class="p-5">
+                    <div class="flex justify-between items-start mb-2">
+                        <h3 class="font-bold text-xl text-white truncate" title="After The Fall: Free-Roam">After The
+                            Fall: Free-Roam</h3>
+                        <div class="flex text-yellow-500 text-xs">
+                            <i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i
+                                class="fas fa-star"></i>
+                        </div>
+                    </div>
+                    <p class="text-gray-400 text-sm mb-4 line-clamp-2">
+                        استمتع بتجربة After The Fall: Free-Roam المثيرة في صالة Petra XR.
+                    </p>
+                    <div class="flex items-center justify-between text-xs text-gray-500 border-t border-white/10 pt-3">
+                        <span><i class="fas fa-users mr-1"></i> 1 - 8</span>
+                        <span><i class="fas fa-clock mr-1"></i> حسب الحجز</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="game-card rounded-2xl group cursor-pointer" data-category="action freeroam"
+                data-title="Timebound: Whispers of Osiris">
+                <div class="relative h-64 overflow-hidden">
+                    <img alt="Timebound: Whispers of Osiris"
+                        class="w-full h-full object-cover transform group-hover:scale-110 transition duration-700"
+                        loading="lazy"
+                        src="https://cdn.synthesisvr.com/gameassets/svr_79565/header460x215_1756717081.webp" />
+                    <div class="absolute top-3 right-3 z-10">
+                        <span class="badge badge-action">ألغاز</span>
+                    </div>
+                    <div
+                        class="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition duration-300 flex items-center justify-center">
+                        <a class="bg-purple-600 hover:bg-purple-700 text-white px-6 py-2 rounded-full font-bold transform translate-y-4 group-hover:translate-y-0 transition duration-300"
+                            href="https://cdn.synthesisvr.com/gameassets/svr_79565/trailer.mp4" target="_blank">
+                            التفاصيل
+                        </a>
+                    </div>
+                </div>
+                <div class="p-5">
+                    <div class="flex justify-between items-start mb-2">
+                        <h3 class="font-bold text-xl text-white truncate" title="Timebound: Whispers of Osiris">
+                            Timebound: Whispers of Osiris</h3>
+                        <div class="flex text-yellow-500 text-xs">
+                            <i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i
+                                class="fas fa-star"></i>
+                        </div>
+                    </div>
+                    <p class="text-gray-400 text-sm mb-4 line-clamp-2">
+                        استمتع بتجربة Timebound: Whispers of Osiris المثيرة في صالة Petra XR.
+                    </p>
+                    <div class="flex items-center justify-between text-xs text-gray-500 border-t border-white/10 pt-3">
+                        <span><i class="fas fa-users mr-1"></i> 1 - 4</span>
+                        <span><i class="fas fa-clock mr-1"></i> حسب الحجز</span>
+                    </div>
+                </div>
+            </div>
+            <div class="game-card rounded-2xl group cursor-pointer" data-category="action freeroam"
+                data-title="Holomia VR Zone (ex MissionX)">
+                <div class="relative h-64 overflow-hidden">
+                    <img alt="Holomia VR Zone (ex MissionX)"
+                        class="w-full h-full object-cover transform group-hover:scale-110 transition duration-700"
+                        loading="lazy"
+                        src="https://cdn.synthesisvr.com/gameassets/svr_5931/header_2025460x215_1755254524.webp" />
+                    <div class="absolute top-3 right-3 z-10">
+                        <span class="badge badge-action">أكشن</span>
+                    </div>
+                    <div
+                        class="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition duration-300 flex items-center justify-center">
+                        <a class="bg-purple-600 hover:bg-purple-700 text-white px-6 py-2 rounded-full font-bold transform translate-y-4 group-hover:translate-y-0 transition duration-300"
+                            href="https://cdn.synthesisvr.com/gameassets/svr_5931/trailer.webm" target="_blank">
+                            التفاصيل
+                        </a>
+                    </div>
+                </div>
+                <div class="p-5">
+                    <div class="flex justify-between items-start mb-2">
+                        <h3 class="font-bold text-xl text-white truncate" title="Holomia VR Zone (ex MissionX)">Holomia
+                            VR Zone (ex MissionX)</h3>
+                        <div class="flex text-yellow-500 text-xs">
+                            <i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i
+                                class="fas fa-star"></i>
+                        </div>
+                    </div>
+                    <p class="text-gray-400 text-sm mb-4 line-clamp-2">
+                        استمتع بتجربة Holomia VR Zone (ex MissionX) المثيرة في صالة Petra XR.
+                    </p>
+                    <div class="flex items-center justify-between text-xs text-gray-500 border-t border-white/10 pt-3">
+                        <span><i class="fas fa-users mr-1"></i> 1 - 12</span>
+                        <span><i class="fas fa-clock mr-1"></i> حسب الحجز</span>
+                    </div>
+                </div>
+            </div>
+            <div class="game-card rounded-2xl group cursor-pointer" data-category="action" data-title="Hyper Dash">
+                <div class="relative h-64 overflow-hidden">
+                    <img alt="Hyper Dash"
+                        class="w-full h-full object-cover transform group-hover:scale-110 transition duration-700"
+                        loading="lazy"
+                        src="https://cdn.synthesisvr.com/gameassets/svr_6116/header460x215_1677773035.webp" />
+                    <div class="absolute top-3 right-3 z-10">
+                        <span class="badge badge-action">أكشن</span>
+                    </div>
+                    <div
+                        class="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition duration-300 flex items-center justify-center">
+                        <a class="bg-purple-600 hover:bg-purple-700 text-white px-6 py-2 rounded-full font-bold transform translate-y-4 group-hover:translate-y-0 transition duration-300"
+                            href="https://cdn.synthesisvr.com/gameassets/svr_6116/trailer.mp4" target="_blank">
+                            التفاصيل
+                        </a>
+                    </div>
+                </div>
+                <div class="p-5">
+                    <div class="flex justify-between items-start mb-2">
+                        <h3 class="font-bold text-xl text-white truncate" title="Hyper Dash">Hyper Dash</h3>
+                        <div class="flex text-yellow-500 text-xs">
+                            <i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i
+                                class="fas fa-star"></i>
+                        </div>
+                    </div>
+                    <p class="text-gray-400 text-sm mb-4 line-clamp-2">
+                        استمتع بتجربة Hyper Dash المثيرة في صالة Petra XR.
+                    </p>
+                    <div class="flex items-center justify-between text-xs text-gray-500 border-t border-white/10 pt-3">
+                        <span><i class="fas fa-users mr-1"></i> 1</span>
+                        <span><i class="fas fa-clock mr-1"></i> حسب الحجز</span>
+                    </div>
+                </div>
+            </div>
+            <div class="game-card rounded-2xl group cursor-pointer" data-category="kids" data-title="Zephyrus Prelude">
+                <div class="relative h-64 overflow-hidden">
+                    <img alt="Zephyrus Prelude"
+                        class="w-full h-full object-cover transform group-hover:scale-110 transition duration-700"
+                        loading="lazy" src="https://cdn.synthesisvr.com/gameassets/svr_7108/header.webp" />
+                    <div class="absolute top-3 right-3 z-10">
+                        <span class="badge badge-kids">أطفال</span>
+                    </div>
+                    <div
+                        class="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition duration-300 flex items-center justify-center">
+                        <a class="bg-purple-600 hover:bg-purple-700 text-white px-6 py-2 rounded-full font-bold transform translate-y-4 group-hover:translate-y-0 transition duration-300"
+                            href="https://cdn.synthesisvr.com/gameassets/svr_7108/trailerv3.webm" target="_blank">
+                            التفاصيل
+                        </a>
+                    </div>
+                </div>
+                <div class="p-5">
+                    <div class="flex justify-between items-start mb-2">
+                        <h3 class="font-bold text-xl text-white truncate" title="Zephyrus Prelude">Zephyrus Prelude</h3>
+                        <div class="flex text-yellow-500 text-xs">
+                            <i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i
+                                class="fas fa-star"></i>
+                        </div>
+                    </div>
+                    <p class="text-gray-400 text-sm mb-4 line-clamp-2">
+                        استمتع بتجربة Zephyrus Prelude المثيرة في صالة Petra XR.
+                    </p>
+                    <div class="flex items-center justify-between text-xs text-gray-500 border-t border-white/10 pt-3">
+                        <span><i class="fas fa-users mr-1"></i> 1 - 4</span>
+                        <span><i class="fas fa-clock mr-1"></i> حسب الحجز</span>
+                    </div>
+                </div>
+            </div>
+            <div class="game-card rounded-2xl group cursor-pointer" data-category="kids" data-title="Axe Throwing VR">
+                <div class="relative h-64 overflow-hidden">
+                    <img alt="Axe Throwing VR"
+                        class="w-full h-full object-cover transform group-hover:scale-110 transition duration-700"
+                        loading="lazy" src="https://cdn.synthesisvr.com/gameassets/svr_7767/header.webp" />
+                    <div class="absolute top-3 right-3 z-10">
+                        <span class="badge badge-kids">أطفال</span>
+                    </div>
+                    <div
+                        class="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition duration-300 flex items-center justify-center">
+                        <a class="bg-purple-600 hover:bg-purple-700 text-white px-6 py-2 rounded-full font-bold transform translate-y-4 group-hover:translate-y-0 transition duration-300"
+                            href="https://cdn.synthesisvr.com/gameassets/svr_7767/trailer.webm" target="_blank">
+                            التفاصيل
+                        </a>
+                    </div>
+                </div>
+                <div class="p-5">
+                    <div class="flex justify-between items-start mb-2">
+                        <h3 class="font-bold text-xl text-white truncate" title="Axe Throwing VR">Axe Throwing VR</h3>
+                        <div class="flex text-yellow-500 text-xs">
+                            <i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i
+                                class="fas fa-star"></i>
+                        </div>
+                    </div>
+                    <p class="text-gray-400 text-sm mb-4 line-clamp-2">
+                        استمتع بتجربة Axe Throwing VR المثيرة في صالة Petra XR.
+                    </p>
+                    <div class="flex items-center justify-between text-xs text-gray-500 border-t border-white/10 pt-3">
+                        <span><i class="fas fa-users mr-1"></i> 1</span>
+                        <span><i class="fas fa-clock mr-1"></i> حسب الحجز</span>
+                    </div>
+                </div>
+            </div>
+            <div class="game-card rounded-2xl group cursor-pointer" data-category="kids" data-title="VR Plant Journey">
+                <div class="relative h-64 overflow-hidden">
+                    <img alt="VR Plant Journey"
+                        class="w-full h-full object-cover transform group-hover:scale-110 transition duration-700"
+                        loading="lazy"
+                        src="https://cdn.synthesisvr.com/gameassets/svr_6565/header460x215_1672262058.webp" />
+                    <div class="absolute top-3 right-3 z-10">
+                        <span class="badge badge-kids">علمي</span>
+                    </div>
+                    <div
+                        class="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition duration-300 flex items-center justify-center">
+                        <a class="bg-purple-600 hover:bg-purple-700 text-white px-6 py-2 rounded-full font-bold transform translate-y-4 group-hover:translate-y-0 transition duration-300"
+                            href="https://cdn.synthesisvr.com/gameassets/svr_6565/trailer.mp4" target="_blank">
+                            التفاصيل
+                        </a>
+                    </div>
+                </div>
+                <div class="p-5">
+                    <div class="flex justify-between items-start mb-2">
+                        <h3 class="font-bold text-xl text-white truncate" title="VR Plant Journey">VR Plant Journey</h3>
+                        <div class="flex text-yellow-500 text-xs">
+                            <i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i
+                                class="fas fa-star"></i>
+                        </div>
+                    </div>
+                    <p class="text-gray-400 text-sm mb-4 line-clamp-2">
+                        استمتع بتجربة VR Plant Journey المثيرة في صالة Petra XR.
+                    </p>
+                    <div class="flex items-center justify-between text-xs text-gray-500 border-t border-white/10 pt-3">
+                        <span><i class="fas fa-users mr-1"></i> 1</span>
+                        <span><i class="fas fa-clock mr-1"></i> حسب الحجز</span>
+                    </div>
+                </div>
+            </div>
+            <div class="game-card rounded-2xl group cursor-pointer" data-category="kids" data-title="Oddball">
+                <div class="relative h-64 overflow-hidden">
+                    <img alt="Oddball"
+                        class="w-full h-full object-cover transform group-hover:scale-110 transition duration-700"
+                        loading="lazy" src="https://cdn.synthesisvr.com/gameassets/svr_5944/header.webp" />
+                    <div class="absolute top-3 right-3 z-10">
+                        <span class="badge badge-kids">عائلي</span>
+                    </div>
+                    <div
+                        class="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition duration-300 flex items-center justify-center">
+                        <a class="bg-purple-600 hover:bg-purple-700 text-white px-6 py-2 rounded-full font-bold transform translate-y-4 group-hover:translate-y-0 transition duration-300"
+                            href="https://cdn.synthesisvr.com/gameassets/svr_5944/trailer.mp4" target="_blank">
+                            التفاصيل
+                        </a>
+                    </div>
+                </div>
+                <div class="p-5">
+                    <div class="flex justify-between items-start mb-2">
+                        <h3 class="font-bold text-xl text-white truncate" title="Oddball">Oddball</h3>
+                        <div class="flex text-yellow-500 text-xs">
+                            <i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i
+                                class="fas fa-star"></i>
+                        </div>
+                    </div>
+                    <p class="text-gray-400 text-sm mb-4 line-clamp-2">
+                        استمتع بتجربة Oddball المثيرة في صالة Petra XR.
+                    </p>
+                    <div class="flex items-center justify-between text-xs text-gray-500 border-t border-white/10 pt-3">
+                        <span><i class="fas fa-users mr-1"></i> 1 - 8</span>
+                        <span><i class="fas fa-clock mr-1"></i> حسب الحجز</span>
+                    </div>
+                </div>
+            </div>
+            <div class="game-card rounded-2xl group cursor-pointer" data-category="action freeroam"
+                data-title="Cops vs Robbers">
+                <div class="relative h-64 overflow-hidden">
+                    <img alt="Cops vs Robbers"
+                        class="w-full h-full object-cover transform group-hover:scale-110 transition duration-700"
+                        loading="lazy"
+                        src="https://cdn.synthesisvr.com/gameassets/svr_5739/header2460x215_1672244114.webp" />
+                    <div class="absolute top-3 right-3 z-10">
+                        <span class="badge badge-action">أكشن</span>
+                    </div>
+                    <div
+                        class="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition duration-300 flex items-center justify-center">
+                        <a class="bg-purple-600 hover:bg-purple-700 text-white px-6 py-2 rounded-full font-bold transform translate-y-4 group-hover:translate-y-0 transition duration-300"
+                            href="https://cdn.synthesisvr.com/gameassets/svr_5739/trailer2024.webm" target="_blank">
+                            التفاصيل
+                        </a>
+                    </div>
+                </div>
+                <div class="p-5">
+                    <div class="flex justify-between items-start mb-2">
+                        <h3 class="font-bold text-xl text-white truncate" title="Cops vs Robbers">Cops vs Robbers</h3>
+                        <div class="flex text-yellow-500 text-xs">
+                            <i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i
+                                class="fas fa-star"></i>
+                        </div>
+                    </div>
+                    <p class="text-gray-400 text-sm mb-4 line-clamp-2">
+                        استمتع بتجربة Cops vs Robbers المثيرة في صالة Petra XR.
+                    </p>
+                    <div class="flex items-center justify-between text-xs text-gray-500 border-t border-white/10 pt-3">
+                        <span><i class="fas fa-users mr-1"></i> 1 - 8</span>
+                        <span><i class="fas fa-clock mr-1"></i> حسب الحجز</span>
+                    </div>
+                </div>
+            </div>
+            <div class="game-card rounded-2xl group cursor-pointer" data-category="cool"
+                data-title="Epic Roller Coasters">
+                <div class="relative h-64 overflow-hidden">
+                    <img alt="Epic Roller Coasters"
+                        class="w-full h-full object-cover transform group-hover:scale-110 transition duration-700"
+                        loading="lazy"
+                        src="https://cdn.synthesisvr.com/gameassets/svr_4678/header460x215_1672236391.webp" />
+                    <div class="absolute top-3 right-3 z-10">
+                        <span class="badge badge-cool">حماس</span>
+                    </div>
+                    <div
+                        class="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition duration-300 flex items-center justify-center">
+                        <a class="bg-purple-600 hover:bg-purple-700 text-white px-6 py-2 rounded-full font-bold transform translate-y-4 group-hover:translate-y-0 transition duration-300"
+                            href="https://cdn.akamai.steamstatic.com/steam/apps/256753295/movie480.webm?t=1561080682"
+                            target="_blank">
+                            التفاصيل
+                        </a>
+                    </div>
+                </div>
+                <div class="p-5">
+                    <div class="flex justify-between items-start mb-2">
+                        <h3 class="font-bold text-xl text-white truncate" title="Epic Roller Coasters">Epic Roller
+                            Coasters</h3>
+                        <div class="flex text-yellow-500 text-xs">
+                            <i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i
+                                class="fas fa-star"></i>
+                        </div>
+                    </div>
+                    <p class="text-gray-400 text-sm mb-4 line-clamp-2">
+                        استمتع بتجربة Epic Roller Coasters المثيرة في صالة Petra XR.
+                    </p>
+                    <div class="flex items-center justify-between text-xs text-gray-500 border-t border-white/10 pt-3">
+                        <span><i class="fas fa-users mr-1"></i> 1</span>
+                        <span><i class="fas fa-clock mr-1"></i> حسب الحجز</span>
+                    </div>
+                </div>
+            </div>
+            <div class="game-card rounded-2xl group cursor-pointer" data-category="action" data-title="Sairento VR">
+                <div class="relative h-64 overflow-hidden">
+                    <img alt="Sairento VR"
+                        class="w-full h-full object-cover transform group-hover:scale-110 transition duration-700"
+                        loading="lazy"
+                        src="https://cdn.synthesisvr.com/gameassets/svr_44/header460x215_1672317105.webp" />
+                    <div class="absolute top-3 right-3 z-10">
+                        <span class="badge badge-action">أكشن</span>
+                    </div>
+                    <div
+                        class="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition duration-300 flex items-center justify-center">
+                        <a class="bg-purple-600 hover:bg-purple-700 text-white px-6 py-2 rounded-full font-bold transform translate-y-4 group-hover:translate-y-0 transition duration-300"
+                            href="https://cdn.synthesisvr.com/gameassets/svr_44/trailer.webm" target="_blank">
+                            التفاصيل
+                        </a>
+                    </div>
+                </div>
+                <div class="p-5">
+                    <div class="flex justify-between items-start mb-2">
+                        <h3 class="font-bold text-xl text-white truncate" title="Sairento VR">Sairento VR</h3>
+                        <div class="flex text-yellow-500 text-xs">
+                            <i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i
+                                class="fas fa-star"></i>
+                        </div>
+                    </div>
+                    <p class="text-gray-400 text-sm mb-4 line-clamp-2">
+                        استمتع بتجربة Sairento VR المثيرة في صالة Petra XR.
+                    </p>
+                    <div class="flex items-center justify-between text-xs text-gray-500 border-t border-white/10 pt-3">
+                        <span><i class="fas fa-users mr-1"></i> 1</span>
+                        <span><i class="fas fa-clock mr-1"></i> حسب الحجز</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+    <!-- Footer -->
+    <footer class="bg-black py-8 border-t border-gray-900 text-center relative z-10">
+        <p class="text-gray-500 text-sm">© 2024 Petra XR. جميع الحقوق محفوظة.</p>
+    </footer>
+    <!-- Three.js Background -->
+    <script>
+        const container = document.getElementById('canvas-container');
+        const scene = new THREE.Scene();
+        scene.fog = new THREE.FogExp2(0x050505, 0.002);
+
+        const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+        camera.position.z = 5;
+
+        const renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true });
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        renderer.setPixelRatio(window.devicePixelRatio);
+        container.appendChild(renderer.domElement);
+
+        // Particles
+        const particlesGeometry = new THREE.BufferGeometry();
+        const particlesCount = 1500;
+        const posArray = new Float32Array(particlesCount * 3);
+
+        for (let i = 0; i < particlesCount * 3; i++) {
+            posArray[i] = (Math.random() - 0.5) * 25;
+        }
+
+        particlesGeometry.setAttribute('position', new THREE.BufferAttribute(posArray, 3));
+
+        const material = new THREE.PointsMaterial({
+            size: 0.015,
+            color: 0x8b5cf6,
+            transparent: true,
+            opacity: 0.6,
+        });
+
+        const particlesMesh = new THREE.Points(particlesGeometry, material);
+        scene.add(particlesMesh);
+
+        let mouseX = 0;
+        let mouseY = 0;
+        const windowHalfX = window.innerWidth / 2;
+        const windowHalfY = window.innerHeight / 2;
+
+        document.addEventListener('mousemove', (event) => {
+            mouseX = (event.clientX - windowHalfX);
+            mouseY = (event.clientY - windowHalfY);
+        });
+
+        function animate() {
+            requestAnimationFrame(animate);
+            particlesMesh.rotation.y += 0.0002;
+            camera.position.x += (mouseX * 0.0005 - camera.position.x) * 0.05;
+            camera.position.y += (-mouseY * 0.0005 - camera.position.y) * 0.05;
+            camera.lookAt(scene.position);
+            renderer.render(scene, camera);
+        }
+
+        animate();
+
+        window.addEventListener('resize', () => {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+        });
+
+        // Filter Logic
+        const searchInput = document.getElementById('searchInput');
+        const filterBtns = document.querySelectorAll('.filter-btn');
+        const allGames = document.querySelectorAll('.game-card');
+
+        function filterGames() {
+            const searchTerm = searchInput.value.toLowerCase();
+            const activeFilter = document.querySelector('.filter-btn.active').getAttribute('data-filter');
+
+            allGames.forEach(card => {
+                const title = card.getAttribute('data-title').toLowerCase();
+                const category = card.getAttribute('data-category');
+
+                const matchesSearch = title.includes(searchTerm);
+                const matchesFilter = activeFilter === 'all' || category.includes(activeFilter);
+
+                if (matchesSearch && matchesFilter) {
+                    card.style.display = 'block';
+                } else {
+                    card.style.display = 'none';
+                }
+            });
+        }
+
+        searchInput.addEventListener('input', filterGames);
+
+        filterBtns.forEach(btn => {
+            btn.addEventListener('click', () => {
+                filterBtns.forEach(b => {
+                    b.classList.remove('active');
+                    b.classList.add('bg-white/5', 'text-gray-300');
+                });
+                btn.classList.add('active');
+                btn.classList.remove('bg-white/5', 'text-gray-300');
+                filterGames();
+            });
+        });
+    </script>
+</body>
+
+</html>
